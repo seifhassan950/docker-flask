@@ -1,26 +1,30 @@
 from flask import Flask
 import psycopg2
+import os
 
 app = Flask(__name__)
 
 def get_name():
     conn = psycopg2.connect(
-        host="postgres-db",
-        database="mydb",
-        user="postgres",
-        password="password"
+        host=os.getenv("POSTGRES_HOST"),
+        database=os.getenv("POSTGRES_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD")
     )
 
     cur = conn.cursor()
 
     cur.execute("SELECT name FROM users LIMIT 1;")
 
-    name = cur.fetchone()[0]
+    result = cur.fetchone()
 
     cur.close()
     conn.close()
 
-    return name
+    if result:
+        return result[0]
+    else:
+        return "World"
 
 @app.route("/")
 def home():
